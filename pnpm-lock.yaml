@@ -20,6 +20,12 @@ dependencies:
   typescript:
     specifier: ^5.1.6
     version: 5.1.6
+  zennv:
+    specifier: ^0.1.1
+    version: 0.1.1
+  zod:
+    specifier: ^3.21.4
+    version: 3.21.4
 
 devDependencies:
   '@swc/cli':
@@ -2317,3 +2323,15 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
+
+  /zennv@0.1.1:
+    resolution: {integrity: sha512-yAszZBjMYY97kuQ7pVQm5FLz/amtOpzyyhaF7+CwdJZ3Kz9f60pLy2LRqygdcWcV3LcxsUcngfWXxk5ZO98XRQ==}
+    engines: {node: '>=10'}
+    dependencies:
+      dotenv: 16.3.1
+      zod: 3.21.4
+    dev: false
+
+  /zod@3.21.4:
+    resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
+    dev: false
