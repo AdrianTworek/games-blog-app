@@ -1,12 +1,11 @@
 import { createServer } from 'http';
 import { config } from 'dotenv';
-import { app } from './app';
 import { env } from './config/env';
+import { app } from './app';
 
 config();
 
-const PORT = env.PORT;
-const HOST = env.HOST;
+const { PORT, HOST } = env;
 
 const server = createServer(app);
 
