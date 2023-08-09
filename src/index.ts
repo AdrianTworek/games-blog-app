@@ -1,7 +1,7 @@
 import { createServer } from 'http';
 import { config } from 'dotenv';
-import { env } from './config/env';
-import { app } from './app';
+import { env } from '@src/config/env';
+import { app } from '@src/app';
 
 config();
 
