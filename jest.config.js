@@ -1,6 +1,8 @@
 /*eslint no-undef: off */
 module.exports = {
   clearMocks: true,
+  resetMocks: true,
+  restoreMocks: true,
   collectCoverage: true,
   coverageDirectory: 'coverage',
   coveragePathIgnorePatterns: ['/node_modules/', '/src/db/'],
