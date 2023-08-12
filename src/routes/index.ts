@@ -1,7 +1,7 @@
 import express from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { authRouter } from '@src/modules/auth/auth.routes';
-import { globalErrorHandler } from '@src/utils/appError';
+import { globalErrorHandler } from '@src/middleware/globalErrorHandler';
 
 const router = express.Router();
 
