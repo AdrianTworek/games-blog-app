@@ -7,3 +7,7 @@ export const register = async (data: Prisma.UserCreateInput) => {
     select: { id: true, email: true, createdAt: true, updatedAt: true },
   });
 };
+
+export const findUserByEmail = async (email: string) => {
+  return await prisma.user.findUnique({ where: { email } });
+};

@@ -77,4 +77,14 @@ describe('auth', () => {
       });
     });
   });
+
+  describe('login', () => {
+    describe('given empty input', () => {
+      it('should return a 400', async () => {
+        await request(app)
+          .post('/api/auth/login')
+          .expect(StatusCodes.BAD_REQUEST);
+      });
+    });
+  });
 });

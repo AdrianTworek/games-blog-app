@@ -25,3 +25,14 @@ export type RegisterInput = Omit<
   z.infer<typeof registerSchema>['body'],
   'passwordConfirm'
 >;
+
+export const loginSchema = z.object({
+  body: z.object({
+    email: z
+      .string({ required_error: 'Email address is required' })
+      .email('Invalid email address'),
+    password: z.string({ required_error: 'Password is required' }),
+  }),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>['body'];
