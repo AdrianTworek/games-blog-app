@@ -3,6 +3,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { api } from '@src/routes';
 
 const app = express();
@@ -16,8 +17,13 @@ app.use(
     legacyHeaders: false,
   })
 );
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+  })
+);
 app.use(helmet());
+app.use(cookieParser());
 app.use('/api', api);
 
 export { app };
