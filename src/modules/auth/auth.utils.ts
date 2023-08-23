@@ -15,17 +15,26 @@ export const signTokens = (email: string) => {
   return { accessToken, refreshToken };
 };
 
-export const verifyJwt = (accessToken: string) => {
+export const verifyJwt = ({
+  token,
+  refresh = false,
+}: {
+  token: string;
+  refresh?: boolean;
+}) => {
   try {
-    return jwt.verify(accessToken, ACCESS_TOKEN_SECRET);
+    return jwt.verify(
+      token,
+      refresh ? REFRESH_TOKEN_SECRET : ACCESS_TOKEN_SECRET
+    );
   } catch (error) {
     return null;
   }
 };
 
-export const setJwtCookie = (res: Response, refreshToken: string) => {
-  res.cookie('jwt', refreshToken, {
+export const setJwtRefreshCookie = (res: Response, refreshToken: string) => {
+  res.cookie('jwt_refresh', refreshToken, {
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    maxAge: 24 * 60 * 60 * 1000, // 1 day,
   });
 };

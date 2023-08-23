@@ -5,7 +5,7 @@ import { Prisma } from '@prisma/client';
 import { AppError } from '@src/utils/appError';
 import { LoginInput, RegisterInput } from './auth.schema';
 import { findUserByEmail, register } from './auth.service';
-import { setJwtCookie, signTokens } from './auth.utils';
+import { setJwtRefreshCookie, signTokens, verifyJwt } from './auth.utils';
 
 export const registerHandler = async (
   req: Request<object, object, RegisterInput>,
@@ -54,9 +54,57 @@ export const loginHandler = async (
 
     const { accessToken, refreshToken } = signTokens(user.email);
 
-    setJwtCookie(res, refreshToken);
+    setJwtRefreshCookie(res, refreshToken);
 
     res.status(StatusCodes.OK).json({ accessToken });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const refreshAccessTokenHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const refreshToken = req.cookies.jwt_refresh;
+    const errorMessage = 'Could not refresh an access token';
+
+    if (!refreshToken) {
+      return next(new AppError(StatusCodes.UNAUTHORIZED, errorMessage));
+    }
+
+    const decoded = verifyJwt({ token: refreshToken, refresh: true }) as {
+      email: string;
+    };
+
+    if (!decoded) {
+      return next(new AppError(StatusCodes.UNAUTHORIZED, errorMessage));
+    }
+
+    const user = await findUserByEmail(decoded.email);
+
+    if (!user) {
+      return next(new AppError(StatusCodes.UNAUTHORIZED, errorMessage));
+    }
+
+    const { accessToken } = signTokens(user.email);
+
+    res.status(StatusCodes.OK).json({ accessToken });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logoutHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    res.clearCookie('jwt_refresh', { httpOnly: true });
+    res.sendStatus(StatusCodes.NO_CONTENT);
   } catch (error) {
     next(error);
   }
