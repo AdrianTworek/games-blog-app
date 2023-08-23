@@ -4,7 +4,14 @@ import { StatusCodes } from 'http-status-codes';
 import { Prisma } from '@prisma/client';
 import { AppError } from '@src/utils/appError';
 import { LoginInput, RegisterInput } from './auth.schema';
-import { findUserByEmail, register } from './auth.service';
+import {
+  createRefreshToken,
+  deleteRefreshToken,
+  findRefreshTokenByUserEmail,
+  findRefreshTokenByUserId,
+  findUserByEmail,
+  register,
+} from './auth.service';
 import { setJwtRefreshCookie, signTokens, verifyJwt } from './auth.utils';
 
 export const registerHandler = async (
@@ -54,6 +61,8 @@ export const loginHandler = async (
 
     const { accessToken, refreshToken } = signTokens(user.email);
 
+    await createRefreshToken(refreshToken, user.id);
+
     setJwtRefreshCookie(res, refreshToken);
 
     res.status(StatusCodes.OK).json({ accessToken });
@@ -89,6 +98,12 @@ export const refreshAccessTokenHandler = async (
       return next(new AppError(StatusCodes.UNAUTHORIZED, errorMessage));
     }
 
+    const dbRefreshToken = await findRefreshTokenByUserId(user.id);
+
+    if (!dbRefreshToken) {
+      return next(new AppError(StatusCodes.UNAUTHORIZED, errorMessage));
+    }
+
     const { accessToken } = signTokens(user.email);
 
     res.status(StatusCodes.OK).json({ accessToken });
@@ -103,6 +118,22 @@ export const logoutHandler = async (
   next: NextFunction
 ) => {
   try {
+    const refreshToken = req.cookies.jwt_refresh;
+    if (!refreshToken) {
+      return res.sendStatus(StatusCodes.NO_CONTENT);
+    }
+
+    const { user } = req;
+
+    const dbRefreshToken = await findRefreshTokenByUserEmail(user.email);
+
+    if (!dbRefreshToken) {
+      res.clearCookie('jwt_refresh', { httpOnly: true });
+      return res.sendStatus(StatusCodes.NO_CONTENT);
+    }
+
+    await deleteRefreshToken(dbRefreshToken.token);
+
     res.clearCookie('jwt_refresh', { httpOnly: true });
     res.sendStatus(StatusCodes.NO_CONTENT);
   } catch (error) {

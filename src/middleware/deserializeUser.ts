@@ -32,7 +32,7 @@ export const deserializeUser = (
       );
     }
 
-    req.user = decoded.email;
+    req.user.email = decoded.email;
     next();
   } catch (error) {
     next(error);
