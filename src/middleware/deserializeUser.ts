@@ -24,8 +24,7 @@ export const deserializeUser = (
       );
     }
 
-    const decoded = verifyJwt(accessToken) as { email: string };
-    console.log(decoded);
+    const decoded = verifyJwt({ token: accessToken }) as { email: string };
 
     if (!decoded) {
       return next(
