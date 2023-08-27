@@ -6,16 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 import { Prisma, RefreshToken } from '@prisma/client';
 import { AppError } from '@src/utils/appError';
 import { LoginInput, RegisterInput } from './auth.schema';
-import {
-  createRefreshToken,
-  deleteRefreshToken,
-  findRefreshToken,
-  findUserByEmail,
-  findUserByRefreshToken,
-  invalidateUserRefreshTokens,
-  register,
-  setRefreshTokenArray,
-} from './auth.service';
+import * as AuthService from './auth.service';
 import { setJwtRefreshCookie, signTokens, verifyJwt } from './auth.utils';
 
 const { REFRESH_TOKEN_SECRET } = env;
@@ -30,7 +21,7 @@ export const registerHandler = async (
 
     const hashedPassword = await argon2.hash(password);
 
-    const user = await register({
+    const user = await AuthService.register({
       email: email.toLowerCase(),
       password: hashedPassword,
     });
@@ -60,7 +51,7 @@ export const loginHandler = async (
     const refreshToken = req.cookies.jwt_refresh;
     const { email, password } = req.body;
 
-    const user = await findUserByEmail(email);
+    const user = await AuthService.findUserByEmail(email);
 
     if (!user || !(await argon2.verify(user.password, password))) {
       return next(new AppError(StatusCodes.BAD_REQUEST, 'Invalid credentials'));
@@ -72,17 +63,17 @@ export const loginHandler = async (
 
     // Check refresh token reuse
     if (refreshToken) {
-      const foundToken = await findRefreshToken(refreshToken);
+      const foundToken = await AuthService.findRefreshToken(refreshToken);
 
       if (!foundToken) {
-        await invalidateUserRefreshTokens(user.email);
+        await AuthService.invalidateUserRefreshTokens(user.email);
       }
 
-      await deleteRefreshToken(refreshToken);
+      await AuthService.deleteRefreshToken(refreshToken);
       res.clearCookie('jwt_refresh', { httpOnly: true });
     }
 
-    await createRefreshToken(newRefreshToken, user.id);
+    await AuthService.createRefreshToken(newRefreshToken, user.id);
 
     setJwtRefreshCookie(res, newRefreshToken);
 
@@ -114,17 +105,17 @@ export const refreshAccessTokenHandler = async (
       return next(new AppError(StatusCodes.FORBIDDEN, errorMessage));
     }
 
-    const foundUser = await findUserByRefreshToken(refreshToken);
+    const foundUser = await AuthService.findUserByRefreshToken(refreshToken);
 
     // Detected refresh token reuse
     if (!foundUser) {
-      const hackedUser = await findUserByEmail(decoded.email);
+      const hackedUser = await AuthService.findUserByEmail(decoded.email);
 
       if (!hackedUser) {
         return next(new AppError(StatusCodes.FORBIDDEN, errorMessage));
       }
 
-      await invalidateUserRefreshTokens(hackedUser.email);
+      await AuthService.invalidateUserRefreshTokens(hackedUser.email);
     }
 
     const newRefreshTokenArr = foundUser?.refreshTokens.filter(
@@ -136,7 +127,7 @@ export const refreshAccessTokenHandler = async (
       REFRESH_TOKEN_SECRET,
       async (err: VerifyErrors | null, decoded: unknown) => {
         if (err) {
-          await setRefreshTokenArray(
+          await AuthService.setRefreshTokenArray(
             foundUser?.email ?? '',
             newRefreshTokenArr
           );
@@ -149,7 +140,10 @@ export const refreshAccessTokenHandler = async (
           email: (decoded as { email: string }).email,
         });
 
-        await createRefreshToken(newRefreshToken, foundUser?.id ?? '');
+        await AuthService.createRefreshToken(
+          newRefreshToken,
+          foundUser?.id ?? ''
+        );
 
         setJwtRefreshCookie(res, newRefreshToken);
 
@@ -172,14 +166,14 @@ export const logoutHandler = async (
       return res.sendStatus(StatusCodes.NO_CONTENT);
     }
 
-    const dbRefreshToken = await findRefreshToken(refreshToken);
+    const dbRefreshToken = await AuthService.findRefreshToken(refreshToken);
 
     if (!dbRefreshToken) {
       res.clearCookie('jwt_refresh', { httpOnly: true });
       return res.sendStatus(StatusCodes.NO_CONTENT);
     }
 
-    await deleteRefreshToken(dbRefreshToken.token);
+    await AuthService.deleteRefreshToken(dbRefreshToken.token);
 
     res.clearCookie('jwt_refresh', { httpOnly: true });
     res.sendStatus(StatusCodes.NO_CONTENT);
