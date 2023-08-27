@@ -4,11 +4,11 @@ import jwt from 'jsonwebtoken';
 
 const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = env;
 
-export const signTokens = (email: string) => {
-  const accessToken = jwt.sign({ email }, ACCESS_TOKEN_SECRET, {
+export const signTokens = (payload: string | Buffer | object) => {
+  const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
     expiresIn: '5m',
   });
-  const refreshToken = jwt.sign({ email }, REFRESH_TOKEN_SECRET, {
+  const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
     expiresIn: '1d',
   });
 

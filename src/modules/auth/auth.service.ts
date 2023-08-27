@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, RefreshToken } from '@prisma/client';
 import { prisma } from '@src/db/prisma';
 
 export const register = async (data: Prisma.UserCreateInput) => {
@@ -9,7 +9,52 @@ export const register = async (data: Prisma.UserCreateInput) => {
 };
 
 export const findUserByEmail = async (email: string) => {
-  return await prisma.user.findUnique({ where: { email } });
+  return await prisma.user.findUnique({
+    where: { email },
+    include: { refreshTokens: true },
+  });
+};
+
+export const findUserByRefreshToken = async (token: string) => {
+  return await prisma.user.findFirst({
+    where: {
+      refreshTokens: {
+        some: {
+          token,
+        },
+      },
+    },
+    select: {
+      id: true,
+      email: true,
+      refreshTokens: true,
+    },
+  });
+};
+
+export const invalidateUserRefreshTokens = async (email: string) => {
+  return await prisma.user.update({
+    where: { email },
+    data: {
+      refreshTokens: {
+        deleteMany: {},
+      },
+    },
+  });
+};
+
+export const setRefreshTokenArray = async (
+  email: string,
+  newRefreshTokens: RefreshToken[]
+) => {
+  return await prisma.user.update({
+    where: { email },
+    data: {
+      refreshTokens: {
+        set: newRefreshTokens,
+      },
+    },
+  });
 };
 
 export const createRefreshToken = async (token: string, userId: string) => {
@@ -22,8 +67,8 @@ export const findRefreshTokenByUserId = async (userId: string) => {
   return await prisma.refreshToken.findFirst({ where: { userId } });
 };
 
-export const findRefreshTokenByUserEmail = async (email: string) => {
-  return await prisma.refreshToken.findFirst({ where: { user: { email } } });
+export const findRefreshToken = async (token: string) => {
+  return await prisma.refreshToken.findUnique({ where: { token } });
 };
 
 export const deleteRefreshToken = async (token: string) => {
