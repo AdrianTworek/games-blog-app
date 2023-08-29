@@ -14,12 +14,22 @@ const bootstrap = async () => {
   server.listen(PORT, HOST, () => {
     console.log(`Server running at http://localhost:${PORT}`);
   });
+
+  const SIGNALS = ['SIGTERM', 'SIGINT'];
+
+  for (const signal of SIGNALS) {
+    process.on(signal, async () => {
+      console.log(`Received ${signal}. Starting graceful shutdown...`);
+      server.close(async () => {
+        console.log('Server closed. Disconnecting Prisma...');
+        await prisma.$disconnect();
+        console.log('Prisma disconnected. Exiting.');
+        process.exit(0);
+      });
+    });
+  }
 };
 
-bootstrap()
-  .catch((error) => {
-    throw error;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+bootstrap().catch((error) => {
+  throw error;
+});
