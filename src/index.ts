@@ -12,7 +12,7 @@ const bootstrap = async () => {
   const server = createServer(app);
 
   server.listen(PORT, HOST, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}/api`);
   });
 
   const SIGNALS = ['SIGTERM', 'SIGINT'];
