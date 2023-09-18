@@ -7,7 +7,7 @@
     "build": "rimraf dist && swc ./src -d dist",
     "test": "jest",
     "test:watch": "jest --watchAll --verbose",
-    "start": "node --inspect=0.0.0.0 dist/index.js",
+    "start": "node dist/index.js",
     "start:docker": "pnpm build && pnpm start",
     "watch": "watchy --no-init-spawn --debounce 1 -w src -- docker-compose restart backend",
     "db:migrate": "knex migrate:latest",
