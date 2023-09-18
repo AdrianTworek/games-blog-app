@@ -14,6 +14,13 @@ jobs:
       matrix:
         node-version: [16, 18, 20]
 
+    env:
+      PORT: ${{ secrets.PORT }}
+      HOST: ${{ secrets.HOST }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+      REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
+
     steps:
       - uses: actions/checkout@v3
 
