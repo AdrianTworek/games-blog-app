@@ -3,6 +3,7 @@ import { config } from 'dotenv';
 import { env } from '@src/config/env';
 import { app } from '@src/app';
 import { prisma } from '@src/db/prisma';
+import { swaggerDocs } from '@src/utils/swagger.js';
 
 config();
 
@@ -13,6 +14,7 @@ const bootstrap = async () => {
 
   server.listen(PORT, HOST, () => {
     console.log(`Server running at http://localhost:${PORT}/api`);
+    swaggerDocs(app, PORT);
   });
 
   const SIGNALS = ['SIGTERM', 'SIGINT'];
