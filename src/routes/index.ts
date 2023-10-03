@@ -1,6 +1,7 @@
 import express from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { authRouter } from '@src/modules/auth/auth.routes';
+import { gameRouter } from '@src/modules/game/game.routes';
 import { globalErrorHandler } from '@src/middleware/globalErrorHandler';
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router.get('/', (req, res) => {
 
 // Routes
 router.use('/auth', authRouter);
+router.use('/games', gameRouter);
 
 // Global error handler
 router.use(globalErrorHandler);
