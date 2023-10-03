@@ -26,4 +26,11 @@ router.use('/auth', authRouter);
 // Global error handler
 router.use(globalErrorHandler);
 
+// Not found route
+router.all('*', (req, res) => {
+  res
+    .status(StatusCodes.NOT_FOUND)
+    .json({ message: `Route '${req.url}' not found` });
+});
+
 export { router as api };
