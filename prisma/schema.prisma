@@ -11,10 +11,12 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  password      String
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
+
   refreshTokens RefreshToken[]
+  games         Game[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -24,8 +26,9 @@ model User {
 }
 
 model RefreshToken {
-  id     String @id @default(cuid())
-  token  String @unique
+  id    String @id @default(cuid())
+  token String @unique
+
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
@@ -33,4 +36,18 @@ model RefreshToken {
   updatedAt DateTime @updatedAt
 
   @@map("refresh_tokens")
+}
+
+model Game {
+  id          String @id @default(cuid())
+  title       String @db.VarChar(255)
+  description String @db.VarChar(1000)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("games")
 }
